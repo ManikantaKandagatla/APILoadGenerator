@@ -20,4 +20,9 @@ public class LoadController {
     public Response submitLoad(@RequestBody LoadRequest loadRequest) {
         return apiLoadService.generate(loadRequest);
     }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/")
+    public String hello() {
+        return "Hello.. The App is running..!!";
+    }
 }
