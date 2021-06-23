@@ -2,7 +2,9 @@
 
 This webapp serves as an utility to fire web requests for the provided API details. 
 
-Sample load generator. Supports parallel request execution with the number of threads specified in the request
+Sample API load generator. Supports parallel request execution with the number of threads specified in the request
+
+Currently the Utility just follows FIRE AND FORGET.
 
 Refer :
 https://github.com/ManikantaKandagatla/APILoadGenerator/blob/master/src/main/resources/sample/request.json for firing sample web api request. 
