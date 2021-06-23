@@ -1,0 +1,17 @@
+curl --location --request POST 'https://api-load-generator.herokuapp.com/load' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "threads": 5,
+    "requests": [
+        {
+            "headers": {
+            },
+            "body": {
+            },
+            "url": "https://jsonplaceholder.typicode.com/posts",
+            "httpMethod": "get",
+            "randomGenKeys": [
+            ]
+        }
+    ]
+}'
