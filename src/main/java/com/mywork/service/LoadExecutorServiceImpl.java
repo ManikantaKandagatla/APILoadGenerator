@@ -42,9 +42,9 @@ public class LoadExecutorServiceImpl implements LoadExecutorService {
                     List<Request> requestList = loadRequest.getRequests();
                     int totalThreadsRequired = requestList.size() * loadRequest.getThreads();
                     ExecutorService requestExecutor = Executors.newFixedThreadPool(totalThreadsRequired);
-                    List<Callable<ResponseEntity<Map>>> allCallables = new ArrayList<>();
+                    List<Callable<ResponseEntity<Object>>> allCallables = new ArrayList<>();
                     requestList.forEach(request -> {
-                        List<Callable<ResponseEntity<Map>>> currentRequestCallables = prepareSingleRequest(request, loadRequest.getThreads());
+                        List<Callable<ResponseEntity<Object>>> currentRequestCallables = prepareSingleRequest(request, loadRequest.getThreads());
                         allCallables.addAll(currentRequestCallables);
                     });
                     AllRequests requests = new AllRequests(requestExecutor, allCallables);
@@ -63,14 +63,14 @@ public class LoadExecutorServiceImpl implements LoadExecutorService {
 
     private void executeRequests(AllRequests requestDetails) {
         ExecutorService executorService = requestDetails.getExecutorService();
-        List<Callable<ResponseEntity<Map>>> callables = requestDetails.getCallables();
+        List<Callable<ResponseEntity<Object>>> callables = requestDetails.getCallables();
         log.info("No.of callables: " + callables.size());
         try {
-            List<Future<ResponseEntity<Map>>> futures = executorService.invokeAll(callables);
-            for (Future<ResponseEntity<Map>> future : futures) {
+            List<Future<ResponseEntity<Object>>> futures = executorService.invokeAll(callables);
+            for (Future<ResponseEntity<Object>> future : futures) {
                 try {
                     log.info("future.isDone = " + future.isDone());
-                    ResponseEntity<Map> responseEntity = future.get();
+                    ResponseEntity<Object> responseEntity = future.get();
                     log.info("future: response =" + responseEntity);
                 } catch (CancellationException | ExecutionException ce) {
                     log.error("Exception occurred while executing request.. ", ce);
@@ -87,18 +87,18 @@ public class LoadExecutorServiceImpl implements LoadExecutorService {
         }
     }
 
-    private List<Callable<ResponseEntity<Map>>> prepareSingleRequest(Request request, int threads) {
-        List<Callable<ResponseEntity<Map>>> callables = new ArrayList<>();
+    private List<Callable<ResponseEntity<Object>>> prepareSingleRequest(Request request, int threads) {
+        List<Callable<ResponseEntity<Object>>> callables = new ArrayList<>();
         for (int i = 0; i < threads; i++) {
             Request requestToFire = new Request(request);
             requestToFire = this.transformService.transform(requestToFire);
-            Callable<ResponseEntity<Map>> callable = getCallableForExecutingRequest(requestToFire);
+            Callable<ResponseEntity<Object>> callable = getCallableForExecutingRequest(requestToFire);
             callables.add(callable);
         }
         return callables;
     }
 
-    public Callable<ResponseEntity<Map>> getCallableForExecutingRequest(Request request) {
+    public Callable<ResponseEntity<Object>> getCallableForExecutingRequest(Request request) {
         return () -> {
             RestTemplate restTemplate = new RestTemplate();
             HttpClient httpClient = HttpClientBuilder.create().build();
@@ -106,24 +106,24 @@ public class LoadExecutorServiceImpl implements LoadExecutorService {
                     HttpComponentsClientHttpRequestFactory(httpClient));
             HttpHeaders headers = getHeaders(request.getHeaders());
             HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(request.getBody(), headers);
-            ResponseEntity<Map> responseEntity = null;
+            ResponseEntity<Object> responseEntity = null;
             log.info("Invoking API from thread: " + Thread.currentThread().getId());
             switch (request.getHttpMethod()) {
                 case "POST":
                 case "post":
-                    responseEntity = restTemplate.exchange(request.getUrl(), HttpMethod.POST, httpEntity, Map.class);
+                    responseEntity = restTemplate.exchange(request.getUrl(), HttpMethod.POST, httpEntity, Object.class);
                     break;
                 case "GET":
                 case "get":
-                    responseEntity = restTemplate.exchange(request.getUrl(), HttpMethod.GET, httpEntity, Map.class);
+                    responseEntity = restTemplate.exchange(request.getUrl(), HttpMethod.GET, httpEntity, Object.class);
                     break;
                 case "PATCH":
                 case "patch":
-                    responseEntity = restTemplate.exchange(request.getUrl(), HttpMethod.PATCH, httpEntity, Map.class);
+                    responseEntity = restTemplate.exchange(request.getUrl(), HttpMethod.PATCH, httpEntity, Object.class);
                     break;
                 case "PUT":
                 case "put":
-                    responseEntity = restTemplate.exchange(request.getUrl(), HttpMethod.PUT, httpEntity, Map.class);
+                    responseEntity = restTemplate.exchange(request.getUrl(), HttpMethod.PUT, httpEntity, Object.class);
                     break;
             }
             return responseEntity;
@@ -139,9 +139,9 @@ public class LoadExecutorServiceImpl implements LoadExecutorService {
     @Data
     static class AllRequests {
         ExecutorService executorService;
-        List<Callable<ResponseEntity<Map>>> callables;
+        List<Callable<ResponseEntity<Object>>> callables;
 
-        AllRequests(ExecutorService executorService, List<Callable<ResponseEntity<Map>>> callables) {
+        AllRequests(ExecutorService executorService, List<Callable<ResponseEntity<Object>>> callables) {
             this.callables = callables;
             this.executorService = executorService;
         }

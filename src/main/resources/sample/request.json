@@ -1,0 +1,25 @@
+{
+  "threads": 5,
+  "requests": [
+    {
+      "headers": {
+      },
+      "body": {
+      },
+      "url": "https://jsonplaceholder.typicode.com/posts",
+      "httpMethod": "get",
+      "randomGenKeys": [
+      ]
+    },
+    {
+      "headers": {
+      },
+      "body": {
+      },
+      "url": "https://jsonplaceholder.typicode.com/posts/comments",
+      "httpMethod": "get",
+      "randomGenKeys": [
+      ]
+    }
+  ]
+}
